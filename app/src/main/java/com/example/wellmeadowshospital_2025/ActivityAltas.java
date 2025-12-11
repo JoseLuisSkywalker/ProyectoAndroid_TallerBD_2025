@@ -4,7 +4,9 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.text.InputFilter;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -15,7 +17,8 @@ import entities.Medico;
 
 public class ActivityAltas extends Activity {
 
-    EditText cajaId, cajaNombre, cajaApellido, cajaNumDepartamento, cajaCalle;
+    EditText cajaId, cajaNombre, cajaApellido, cajaCalle;
+    Spinner spinnerNumDepartamento;
     MedicoDAO medicoDAO;
 
     @Override
@@ -27,18 +30,28 @@ public class ActivityAltas extends Activity {
         cajaId = findViewById(R.id.edtIdMedico);
         cajaNombre = findViewById(R.id.edtNombreMedico);
         cajaApellido = findViewById(R.id.edtApellidoMedico);
-        cajaNumDepartamento = findViewById(R.id.edtNumDepartamento);
+        spinnerNumDepartamento = findViewById(R.id.spinnerNumDepartamento);
         cajaCalle = findViewById(R.id.edtCalle);
 
-        // Inicializar DAO correctamente
-        HospitalBD bd = HospitalBD.getAppDatabase(getBaseContext());
-        medicoDAO = bd.medicoDAO(); // ← Esto faltaba
 
-        // Aplicar filtros de entrada
-        cajaId.setFilters(new InputFilter[]{new InputFilter.LengthFilter(5)}); // opcional: max 5 dígitos
+        HospitalBD bd = HospitalBD.getAppDatabase(getBaseContext());
+        medicoDAO = bd.medicoDAO();
+
+
+        String[] departamentos = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13,", "14", "15", "16", "17"};
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_spinner_item,
+                departamentos
+        );
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerNumDepartamento.setAdapter(adapter);
+
+
+        cajaId.setFilters(new InputFilter[]{new InputFilter.LengthFilter(5)});
         cajaNombre.setFilters(new InputFilter[]{soloLetrasFilter});
         cajaApellido.setFilters(new InputFilter[]{soloLetrasFilter});
-        cajaNumDepartamento.setFilters(new InputFilter[]{new InputFilter.LengthFilter(5)});
         cajaCalle.setFilters(new InputFilter[]{new InputFilter.LengthFilter(50)});
     }
 
@@ -47,17 +60,20 @@ public class ActivityAltas extends Activity {
         String idStr = cajaId.getText().toString().trim();
         String nombre = cajaNombre.getText().toString().trim();
         String apellido = cajaApellido.getText().toString().trim();
-        String numDepStr = cajaNumDepartamento.getText().toString().trim();
         String calle = cajaCalle.getText().toString().trim();
 
+        // Obtener valor del Spinner
+        String numDepStr = spinnerNumDepartamento.getSelectedItem().toString();
+
         // Validaciones
-        if (idStr.isEmpty() || nombre.isEmpty() || apellido.isEmpty() || numDepStr.isEmpty() || calle.isEmpty()) {
+        if (idStr.isEmpty() || nombre.isEmpty() || apellido.isEmpty() || calle.isEmpty()) {
             Toast.makeText(this, "Debes llenar todos los campos correctamente", Toast.LENGTH_SHORT).show();
             return;
         }
 
         int id;
         int numDepartamento;
+
         try {
             id = Integer.parseInt(idStr);
         } catch (NumberFormatException e) {
@@ -77,20 +93,22 @@ public class ActivityAltas extends Activity {
             return;
         }
 
-        // Crear objeto Medico con ID
+        // Crear objeto Medico con ID manual
         Medico medico = new Medico(nombre, apellido, numDepartamento, calle);
-        medico.setId(id); // asignar ID manualmente
+        medico.setId(id);
 
         // Hilo para insertar en Room
         new Thread(() -> {
             try {
-                medicoDAO.insertarMedico(medico); // ← Ahora sí funciona
+                medicoDAO.insertarMedico(medico);
                 runOnUiThread(() -> {
                     Toast.makeText(this, "Médico registrado correctamente", Toast.LENGTH_SHORT).show();
                     limpiarCampos();
                 });
             } catch (Exception e) {
-                runOnUiThread(() -> Toast.makeText(this, "Error al insertar: " + e.getMessage(), Toast.LENGTH_LONG).show());
+                runOnUiThread(() ->
+                        Toast.makeText(this, "Error al insertar: " + e.getMessage(), Toast.LENGTH_LONG).show()
+                );
             }
         }).start();
     }
@@ -100,7 +118,7 @@ public class ActivityAltas extends Activity {
         cajaId.setText("");
         cajaNombre.setText("");
         cajaApellido.setText("");
-        cajaNumDepartamento.setText("");
+        spinnerNumDepartamento.setSelection(0);
         cajaCalle.setText("");
         cajaId.requestFocus();
     }

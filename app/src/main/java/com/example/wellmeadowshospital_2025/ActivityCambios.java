@@ -4,8 +4,10 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.text.InputFilter;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -16,7 +18,8 @@ import controllers.MedicoDAO;
 
 public class ActivityCambios extends Activity {
 
-    EditText cajaId, cajaNombre, cajaApellido, cajaNumDep, cajaCalle;
+    EditText cajaId, cajaNombre, cajaApellido, cajaCalle;
+    Spinner spinnerNumDep;
     Button btnBuscar, btnActualizar, btnRegresar;
     MedicoDAO medicoDAO;
     Medico medicoEncontrado;
@@ -26,64 +29,76 @@ public class ActivityCambios extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cambios);
 
-        // Inicializar campos
         cajaId = findViewById(R.id.edtIdMedico);
         cajaNombre = findViewById(R.id.edtNombreMedico);
         cajaApellido = findViewById(R.id.edtApellidoMedico);
-        cajaNumDep = findViewById(R.id.edtNumDepartamento);
+        spinnerNumDep = findViewById(R.id.spinnerNumDepartamento);
         cajaCalle = findViewById(R.id.edtCalle);
 
         btnBuscar = findViewById(R.id.btnBuscarMedico);
         btnActualizar = findViewById(R.id.btnActualizarMedico);
         btnRegresar = findViewById(R.id.btnRegresar);
 
-        // Inicializar DAO
         HospitalBD bd = HospitalBD.getAppDatabase(getBaseContext());
         medicoDAO = bd.medicoDAO();
 
-        // Inicialmente deshabilitar campos y botón actualizar
         setCamposEnabled(false);
         btnActualizar.setEnabled(false);
         btnActualizar.setAlpha(0.5f);
 
-        // Filtro para bloquear espacios y caracteres inválidos
+        // Filtro para ID
+        InputFilter soloNumerosFilter = (source, start, end, dest, dstart, dend) -> {
+            for (int i = start; i < end; i++) {
+                if (!Character.isDigit(source.charAt(i))) {
+                    Toast.makeText(this, "Solo números", Toast.LENGTH_SHORT).show();
+                    return "";
+                }
+            }
+            return null;
+        };
+
+        // Filtro letras
         InputFilter soloLetrasFilter = (source, start, end, dest, dstart, dend) -> {
             for (int i = start; i < end; i++) {
                 char c = source.charAt(i);
                 if (!Character.isLetter(c) && c != ' ') {
-                    Toast.makeText(this, "Solo debes ingresar letras", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Solo letras", Toast.LENGTH_SHORT).show();
                     return "";
                 }
             }
             return null;
         };
 
-        InputFilter soloNumerosFilter = (source, start, end, dest, dstart, dend) -> {
-            for (int i = start; i < end; i++) {
-                char c = source.charAt(i);
-                if (!Character.isDigit(c)) {
-                    Toast.makeText(this, "Solo debes ingresar números", Toast.LENGTH_SHORT).show();
-                    return "";
-                }
-            }
-            return null;
-        };
-
-        // Aplicar filtros
         cajaId.setFilters(new InputFilter[]{new InputFilter.LengthFilter(5), soloNumerosFilter});
         cajaNombre.setFilters(new InputFilter[]{soloLetrasFilter});
         cajaApellido.setFilters(new InputFilter[]{soloLetrasFilter});
-        cajaNumDep.setFilters(new InputFilter[]{new InputFilter.LengthFilter(5), soloNumerosFilter});
+
+        cargarSpinnerDepartamentos();
+    }
+
+    private void cargarSpinnerDepartamentos() {
+        Integer[] departamentos = new Integer[20];
+        for (int i = 0; i < 20; i++) {
+            departamentos[i] = i + 1;
+        }
+
+        ArrayAdapter<Integer> adapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, departamentos);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        spinnerNumDep.setAdapter(adapter);
     }
 
     private void setCamposEnabled(boolean enabled) {
         cajaNombre.setEnabled(enabled);
         cajaApellido.setEnabled(enabled);
-        cajaNumDep.setEnabled(enabled);
+        spinnerNumDep.setEnabled(enabled);
         cajaCalle.setEnabled(enabled);
     }
 
-    // Buscar médico por ID
+    // -----------------------------
+    // Buscar médico
+    // -----------------------------
     public void buscarMedico(View v) {
         String idStr = cajaId.getText().toString().trim();
         if (idStr.isEmpty()) {
@@ -94,7 +109,7 @@ public class ActivityCambios extends Activity {
         int id;
         try {
             id = Integer.parseInt(idStr);
-        } catch (NumberFormatException e) {
+        } catch (Exception e) {
             Toast.makeText(this, "ID inválido", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -104,15 +119,18 @@ public class ActivityCambios extends Activity {
 
             runOnUiThread(() -> {
                 if (medicoEncontrado != null) {
+
                     cajaNombre.setText(medicoEncontrado.getNombre());
                     cajaApellido.setText(medicoEncontrado.getApellido());
-                    cajaNumDep.setText(String.valueOf(medicoEncontrado.getNumeroDepartamento()));
                     cajaCalle.setText(medicoEncontrado.getCalle());
 
-                    // Habilitar campos para edición
+                    // Seleccionar valor del spinner según BD
+                    spinnerNumDep.setSelection(medicoEncontrado.getNumeroDepartamento() - 1);
+
                     setCamposEnabled(true);
                     btnActualizar.setEnabled(true);
                     btnActualizar.setAlpha(1f);
+
                 } else {
                     Toast.makeText(this, "Médico no encontrado", Toast.LENGTH_SHORT).show();
                     limpiarCampos();
@@ -121,34 +139,29 @@ public class ActivityCambios extends Activity {
         }).start();
     }
 
-    // Actualizar médico
+    // -----------------------------
+    // Actualizar Médico
+    // -----------------------------
     public void actualizarMedico(View v) {
+
         if (medicoEncontrado == null) {
-            Toast.makeText(this, "No hay médico seleccionado para actualizar", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "No hay médico seleccionado", Toast.LENGTH_SHORT).show();
             return;
         }
 
         String nombre = cajaNombre.getText().toString().trim();
         String apellido = cajaApellido.getText().toString().trim();
-        String numDepStr = cajaNumDep.getText().toString().trim();
         String calle = cajaCalle.getText().toString().trim();
+        int numDepartamento = Integer.parseInt(spinnerNumDep.getSelectedItem().toString());
 
-        if (nombre.isEmpty() || apellido.isEmpty() || numDepStr.isEmpty() || calle.isEmpty()) {
-            Toast.makeText(this, "Debes llenar todos los campos", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        int numDep;
-        try {
-            numDep = Integer.parseInt(numDepStr);
-        } catch (NumberFormatException e) {
-            Toast.makeText(this, "Número de departamento inválido", Toast.LENGTH_SHORT).show();
+        if (nombre.isEmpty() || apellido.isEmpty() || calle.isEmpty()) {
+            Toast.makeText(this, "Completa todos los campos", Toast.LENGTH_SHORT).show();
             return;
         }
 
         medicoEncontrado.setNombre(nombre);
         medicoEncontrado.setApellido(apellido);
-        medicoEncontrado.setNumeroDepartamento(numDep);
+        medicoEncontrado.setNumeroDepartamento(numDepartamento);
         medicoEncontrado.setCalle(calle);
 
         new Thread(() -> {
@@ -157,13 +170,17 @@ public class ActivityCambios extends Activity {
 
                 runOnUiThread(() -> {
                     Toast.makeText(this, "Médico actualizado correctamente", Toast.LENGTH_SHORT).show();
+
                     limpiarCampos();
                     btnActualizar.setEnabled(false);
                     btnActualizar.setAlpha(0.5f);
                     medicoEncontrado = null;
                 });
+
             } catch (Exception e) {
-                runOnUiThread(() -> Toast.makeText(this, "Error al actualizar: " + e.getMessage(), Toast.LENGTH_LONG).show());
+                runOnUiThread(() ->
+                        Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show()
+                );
             }
         }).start();
     }
@@ -172,8 +189,8 @@ public class ActivityCambios extends Activity {
         cajaId.setText("");
         cajaNombre.setText("");
         cajaApellido.setText("");
-        cajaNumDep.setText("");
         cajaCalle.setText("");
+        spinnerNumDep.setSelection(0);
         setCamposEnabled(false);
         cajaId.requestFocus();
     }
