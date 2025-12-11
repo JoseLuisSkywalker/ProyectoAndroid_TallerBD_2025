@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#A386D9"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- ID del Médico -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ID del Médico"
+            android:textSize="16sp" />
+
+        <EditText
+            android:id="@+id/edtIdMedico"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Ingresa el ID"
+            android:inputType="number" />
+
+        <!-- Nombre -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Nombre"
+            android:textSize="16sp" />
+
+        <EditText
+            android:id="@+id/edtNombreMedico"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Ingresa el nombre" />
+
+        <!-- Apellido -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Apellido"
+            android:textSize="16sp" />
+
+        <EditText
+            android:id="@+id/edtApellidoMedico"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Ingresa el apellido" />
+
+        <!-- Número de Departamento -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Número de Departamento"
+            android:textSize="16sp" />
+
+        <EditText
+            android:id="@+id/edtNumDepartamento"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Ingresa el número de departamento"
+            android:inputType="number" />
+
+        <!-- Calle -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Calle"
+            android:textSize="16sp" />
+
+        <EditText
+            android:id="@+id/edtCalle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Ingresa la calle"
+            android:inputType="textPostalAddress" />
+
+        <!-- Botón Insertar -->
+        <Button
+            android:id="@+id/btnInsertarMedico"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:onClick="agregarMedico"
+            android:text="Insertar" />
+
+        <!-- Botón Regresar -->
+        <Button
+            android:id="@+id/btnRegresar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:onClick="regresar"
+            android:text="Regresar" />
+
+    </LinearLayout>
+</ScrollView>

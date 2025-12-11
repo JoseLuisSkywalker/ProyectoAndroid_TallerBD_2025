@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:background="@drawable/item_medico_bg"
+    android:layout_marginBottom="8dp"
+    android:elevation="2dp">
+
+    <!-- ID del médico -->
+    <TextView
+        android:id="@+id/tvIdMedico"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ID: 123"
+        android:textColor="#E7E0E0"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <!-- Nombre -->
+    <TextView
+        android:id="@+id/tvNombreMedico"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Nombre: Juan"
+        android:textColor="#E7E0E0"
+        android:textSize="16sp"/>
+
+    <!-- Apellido -->
+    <TextView
+        android:id="@+id/tvApellidoMedico"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Apellido: Pérez"
+        android:textColor="#E7E0E0"
+        android:textSize="16sp"/>
+
+    <!-- Número de departamento -->
+    <TextView
+        android:id="@+id/tvNumDepartamento"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Departamento: 5"
+        android:textColor="#E7E0E0"
+        android:textSize="16sp"/>
+
+    <!-- Calle -->
+    <TextView
+        android:id="@+id/tvCalleMedico"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Calle: Av. Salud 123"
+        android:textColor="#E7E0E0"
+        android:textSize="16sp"/>
+
+</LinearLayout>
